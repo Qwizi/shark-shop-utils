@@ -7,8 +7,8 @@ if os.path.isfile(requirementPath):
     with open(requirementPath) as f:
         install_requires = f.read().splitlines()
 setup(
-    name='shark-shop-utils',
-    version='0.0.1',
+    name='shark_shop_utils',
+    version='0.0.2',
     author='Adrian \'Qwizi\' Ciołek',
     author_email='ciolek.adrian@protonmail.com',
     url='',
