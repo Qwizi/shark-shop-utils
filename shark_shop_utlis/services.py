@@ -14,32 +14,34 @@ class BaseService:
     def __init__(self):
         self._table = ormar.Model
 
-    async def get_one(self, server_id: UUID) -> ormar.Model:
+    async def get_one(self, server_id: UUID, **kwargs) -> ormar.Model:
         try:
-            server = await self._table.objects.filter(id=server_id).first()
+            server = await self._table.objects.filter(id=server_id, **kwargs).first()
         except NoMatch:
             raise NOT_FOUND
         return server
 
-    async def get_all(self, pagination: PAGINATION) -> List[ormar.Model]:
+    async def get_all(self, pagination: PAGINATION, **kwargs) -> List[ormar.Model]:
         skip, limit = pagination.get("skip"), pagination.get("limit")
         query = self._table.objects.offset(cast(int, skip))
         if limit:
             query = query.limit(limit)
+        if kwargs:
+            query = query.filter(**kwargs)
         return await query.all()
 
-    async def create(self, schema=None) -> ormar.Model:
+    async def create(self, schema=None, **kwargs) -> ormar.Model:
         model_dict = schema.dict(exclude={"id"})
-        return await self._table.objects.create(**model_dict)
+        return await self._table.objects.create(**model_dict, **kwargs)
 
-    async def delete_one(self, server_id: UUID) -> ormar.Model:
-        model = await self.get_one(server_id=server_id)
+    async def delete_one(self, server_id: UUID, **kwargs) -> ormar.Model:
+        model = await self.get_one(server_id=server_id, **kwargs)
         await model.delete()
         return model
 
-    async def update(self, server_id: UUID, schema=None) -> ormar.Model:
+    async def update(self, server_id: UUID, schema=None, **kwargs) -> ormar.Model:
         await self._table.objects.filter(_exclude=False, id=server_id).update(
-            **schema.dict(exclude_unset=True)
+            **schema.dict(exclude_unset=True), **kwargs
         )
         return await self.get_one(server_id=server_id)
 
