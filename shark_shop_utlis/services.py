@@ -1,9 +1,9 @@
-from typing import List, cast, Any, Coroutine
+from typing import List, cast
 from uuid import UUID
 
 import ormar
 from fastapi import HTTPException
-from ormar import NoMatch, Model
+from ormar import NoMatch
 
 from shark_shop_utlis.depends import PAGINATION
 
@@ -37,11 +37,11 @@ class BaseService:
         await model.delete()
         return model
 
-    async def update(self, server_id: UUID, schema=None) -> Coroutine[Any, Any, Model]:
+    async def update(self, server_id: UUID, schema=None) -> ormar.Model:
         await self._table.objects.filter(_exclude=False, id=server_id).update(
             **schema.dict(exclude_unset=True)
         )
-        return self.get_one(server_id=server_id)
+        return await self.get_one(server_id=server_id)
 
     async def delete_all(self):
         await self._table.objects.delete(each=True)
